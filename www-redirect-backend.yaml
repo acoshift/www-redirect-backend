@@ -1,0 +1,45 @@
+apiVersion: apps/v1beta1
+kind: Deployment
+metadata:
+  name: www-redirect-backend
+  labels:
+    app: www-redirect-backend
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: www-redirect-backend
+    spec:
+      containers:
+      - name: www-redirect-backend
+        image: acoshift/www-redirect-backend:1.0.0
+        livenessProbe:
+          httpGet:
+            path: /healthz
+            port: 8080
+            scheme: HTTP
+          initialDelaySeconds: 30
+          timeoutSeconds: 5
+        ports:
+        - containerPort: 8080
+        resources:
+          limits:
+            cpu: 10m
+            memory: 20Mi
+          requests:
+            cpu: 10m
+            memory: 20Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: www-redirect-backend
+  labels:
+    app: www-redirect-backend
+spec:
+  ports:
+  - port: 8080
+    targetPort: 8080
+  selector:
+    app: www-redirect-backend
