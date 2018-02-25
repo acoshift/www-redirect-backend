@@ -23,7 +23,7 @@ spec:
             topologyKey: kubernetes.io/hostname
       containers:
       - name: www-redirect-backend
-        image: acoshift/www-redirect-backend:1.2
+        image: acoshift/www-redirect-backend:1.1
         livenessProbe:
           httpGet:
             path: /healthz
