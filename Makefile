@@ -1,6 +1,6 @@
 IMAGE=acoshift/www-redirect-backend
-TAG=1.1
-GOLANG_VERSION=1.10
+TAG=1.2
+GOLANG_VERSION=1.10.1
 REPO=github.com/acoshift/www-redirect-backend
 
 server: server.go
