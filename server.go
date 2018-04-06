@@ -18,10 +18,7 @@ func main() {
 	flag.Parse()
 
 	http.HandleFunc("/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		host := r.Header.Get("X-Forwarded-Host")
-		if len(host) == 0 {
-			host = r.Host
-		}
+		host := r.Host
 
 		if !strings.HasPrefix(host, "www.") {
 			http.Redirect(w, r, scheme(r)+"://www."+host+r.RequestURI, http.StatusMovedPermanently)
