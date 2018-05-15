@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"flag"
 	"fmt"
 	"net/http"
 	"os"
@@ -12,31 +11,20 @@ import (
 	"time"
 )
 
-var port = flag.Int("port", 8080, "Port to serve www redirect backend")
-
 func main() {
-	flag.Parse()
-
-	http.HandleFunc("/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		host := r.Host
-
-		if !strings.HasPrefix(host, "www.") {
-			http.Redirect(w, r, scheme(r)+"://www."+host+r.RequestURI, http.StatusMovedPermanently)
-			return
-		}
-
-		w.WriteHeader(http.StatusNotFound)
-		fmt.Fprint(w, "www redirect backend - 404")
-	}))
-
-	http.HandleFunc("/healthz", func(w http.ResponseWriter, r *http.Request) {
-		w.WriteHeader(http.StatusOK)
-		fmt.Fprint(w, "ok")
-	})
-
 	srv := http.Server{
-		Addr:    fmt.Sprintf(":%d", *port),
-		Handler: http.DefaultServeMux,
+		Addr: ":8080",
+		Handler: http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			host := r.Host
+
+			if !strings.HasPrefix(host, "www.") {
+				http.Redirect(w, r, scheme(r)+"://www."+host+r.RequestURI, http.StatusMovedPermanently)
+				return
+			}
+
+			w.WriteHeader(http.StatusNotFound)
+			fmt.Fprint(w, "www redirect backend - 404")
+		}),
 	}
 
 	go func() {
@@ -44,6 +32,13 @@ func main() {
 			fmt.Fprintf(os.Stderr, "could not start http server: %s\n", err)
 			os.Exit(1)
 		}
+	}()
+
+	go func() {
+		// health check
+		http.ListenAndServe(":18080", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			w.WriteHeader(http.StatusOK)
+		}))
 	}()
 
 	stop := make(chan os.Signal, 1)
